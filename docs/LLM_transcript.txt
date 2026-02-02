@@ -178,3 +178,141 @@ But your output includes "12:00".
 
 If start time is in [12:00, 13:00), it is invalid.
 --------------------------------------------------
+
+Prompt: Why is it by anaconda I dont want anaconda: (base) NathanB@Nathanmac EECS4312_Lab5_SpecificationLab_A_219317965 % pip install pytest Requirement already satisfied: pytest in /opt/anaconda3/lib/python3.13/site-packages (8.4.2) Requirement already satisfied: iniconfig>=1 in /opt/anaconda3/lib/python3.13/site-packages (from pytest) (2.1.0) Requirement already satisfied: packaging>=20 in /opt/anaconda3/lib/python3.13/site-packages (from pytest) (25.0) Requirement already satisfied: pluggy<2,>=1.5 in /opt/anaconda3/lib/python3.13/site-packages (from pytest) (1.5.0) Requirement already satisfied: pygments>=2.7.2 in /opt/anaconda3/lib/python3.13/site-packages (from pytest) (2.19.2) (base) NathanB@Nathanmac EECS4312_Lab5_SpecificationLab_A_219317965 % python --version Python 3.13.9
+
+response: 
+Totally fair reaction — this is a very common macOS + Anaconda gotcha, and nothing is “wrong” with your repo or Git 👍
+Let me explain why this is happening and exactly how to get rid of it (or bypass it cleanly).
+
+Why you’re seeing (base) and Anaconda paths
+What this line tells us
+(base) NathanB@Nathanmac ...
+
+
+That means:
+
+Anaconda is installed on your Mac
+
+Its base environment is auto-activated
+
+Your pip and python commands are coming from Anaconda, not system Python
+
+This line confirms it:
+
+/opt/anaconda3/lib/python3.13/site-packages
+
+
+So when you run:
+
+pip install pytest
+
+
+You’re actually running:
+
+Anaconda’s pip
+
+Important reassurance (for your lab)
+
+👉 This will NOT break your EECS4312 lab
+Pytest is pytest no matter where it comes from.
+
+But you’re right to want control, especially as a software engineering student.
+
+Option A (Recommended): Stop Anaconda from auto-activating
+
+This keeps Anaconda installed but out of your way.
+
+Run this once:
+conda config --set auto_activate_base false
+
+
+Then restart your terminal.
+
+You should now see:
+
+NathanB@Nathanmac %
+
+
+(no (base))
+
+Option B (Clean & correct): Use a local virtual environment (best practice)
+
+This completely avoids Anaconda without uninstalling it.
+
+1️⃣ Create a venv in your repo
+python3 -m venv .venv
+
+2️⃣ Activate it
+source .venv/bin/activate
+
+
+Your prompt should now look like:
+
+(.venv) NathanB@Nathanmac %
+
+3️⃣ Install pytest inside the venv
+pip install pytest
+
+
+Now pytest lives only inside this project.
+
+Option C (Hard reset): Use system Python explicitly
+
+If you want to force non-Anaconda Python:
+
+/usr/bin/python3 --version
+
+
+And install with:
+
+/usr/bin/python3 -m pip install pytest
+
+
+(This is more advanced, Option B is cleaner.)
+
+What I recommend for you (given EECS + future internships)
+
+✅ Option B — per-project .venv
+
+Why?
+
+Matches industry practice
+
+Zero Anaconda interference
+
+Zero risk during grading
+
+Cleaner debugging later
+
+Quick sanity check after fixing
+
+Run:
+
+which python
+which pip
+
+
+Inside .venv, both paths should include:
+
+.../EECS4312_Lab5_.../.venv/...
+
+Bottom line
+
+Nothing is broken ❌
+
+Anaconda just auto-activated itself
+
+You’re right to question it
+
+Use .venv and forget Anaconda exists for this lab
+
+If you want, I can:
+
+Help you fully detach VS Code from Anaconda
+
+Set VS Code to auto-select .venv
+
+Explain why Python 3.13 is showing up
+
+Just tell me which one 👍

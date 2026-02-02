@@ -1,5 +1,5 @@
-## Student Name:
-## Student ID: 
+## Student Name: Nathan Binu Edappilly
+## Student ID: 219317965
 
 """
 Public test suite for the meeting slot suggestion exercise.

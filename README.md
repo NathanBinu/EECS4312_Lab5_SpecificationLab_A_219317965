@@ -1,6 +1,6 @@
 ## TODO:
-## Student Name:
-## Student ID: 
+## Student Name: Nathan Binu Edappilly
+## Student ID: 219317965
 
 # Meeting Slot Suggestion Lab Repository
 

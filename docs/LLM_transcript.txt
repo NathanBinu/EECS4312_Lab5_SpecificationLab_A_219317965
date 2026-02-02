@@ -1,10 +1,180 @@
-## Student Name:
-## Student ID: 
+## Student Name: Nathan Binu Edappoilly
+## Student ID: 219317965
 
-Prompt 1: "Copy paste your question"
-LLM Response 1: "Copy paste LLMs response"
+Prompt 1: what is wrong with my pytest why is it not running: (.venv) (base) NathanB@Nathanmac EECS4312_Lab5_SpecificationLab_A_219317965 % pytest =================================== test session starts =================================== platform darwin -- Python 3.13.9, pytest-8.4.2, pluggy-1.5.0 rootdir: /Users/NathanB/EECS4312_Lab5_SpecificationLab_A_219317965 plugins: anyio-4.10.0 collected 0 items / 1 error ========================================= ERRORS ========================================== _________________________ ERROR collecting tests/test_solution.py _________________________ ImportError while importing test module '/Users/NathanB/EECS4312_Lab5_SpecificationLab_A_219317965/tests/test_solution.py'. Hint: make sure your test modules/packages have valid Python names. Traceback: /opt/anaconda3/lib/python3.13/importlib/__init__.py:88: in import_module return _bootstrap._gcd_import(name[level:], package, level) ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ tests/test_solution.py:12: in <module> from solution import suggest_slots E ModuleNotFoundError: No module named 'solution' ================================= short test summary info ================================= ERROR tests/test_solution.py !!!!!!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!!!!!!! ==================================== 1 error in 0.10s ===================================== (.venv) (base) NathanB@Nathanmac EECS4312_Lab5_SpecificationLab_A_219317965 %
+LLM Response 1: 
+
+Your pytest is running — it’s failing during test collection because Python can’t find the module the tests are trying to import:
+
+from solution import suggest_slots
+ModuleNotFoundError: No module named 'solution'
+
+
+That means your solution.py file is not where Python expects it, or your import path isn’t set up for src/.
+
+Also: notice the traceback path is Anaconda:
+
+/opt/anaconda3/lib/python3.13/...
+
+
+So even though you see (.venv), your run is still being influenced by (base)/Anaconda.
+
+Let’s fix both issues fast.
+
+1) Confirm where solution.py actually is
+
+From your repo root:
+
+ls
+ls src
+ls tests
+
+
+You should see either:
+
+solution.py in the repo root OR
+
+src/solution.py (this is what your README says) 
+
+README
+
+If it’s in src/solution.py, then your tests importing solution from root will fail unless we adjust the path.
+
+2) The cleanest fix: run pytest with src on PYTHONPATH
+
+From repo root:
+
+PYTHONPATH=src pytest -v
+
+
+That tells Python: “treat src/ as importable”, so from solution import ... will find src/solution.py.
+
+✅ This is the most common expected setup for this kind of lab.
+
+If that works, you’re done.
+
+3) Make it permanent (so you don’t have to type PYTHONPATH every time)
+Option A: create pytest.ini in the repo root
+
+Create a file named pytest.ini (in the same folder as src/ and tests/) with:
+
+[pytest]
+pythonpath = src
+
+
+Then just run:
+
+pytest -v
+
+4) Fix the Anaconda “(base) + .venv” double-activation
+
+Right now your prompt shows:
+
+(.venv) (base)
+
+
+That means conda base is still active even inside the venv.
+
+Quick fix for this terminal session
+
+Run:
+
+conda deactivate
+
+
+Your prompt should become:
+
+(.venv) NathanB@Nathanmac ...
+
+
+Now verify you are using the venv’s python + pytest:
+
+which python
+which pytest
+python -c "import sys; print(sys.executable)"
+
+
+You want paths that include your repo .venv/..., not /opt/anaconda3/....
+
+5) If it still fails, the repo layout might be different than tests expect
+
+If your tests are located at tests/test_solution.py and they import solution, then one of these must be true:
+
+✅ Either
+
+solution.py is at repo root
+
+✅ Or
+
+src/ is on pythonpath (via PYTHONPATH or pytest.ini)
+
+Do these 2 commands now (fastest resolution)
+
+From repo root:
+
+conda deactivate
+PYTHONPATH=src pytest -v
+
+
+If you paste the output of:
+
+ls
+ls src
+
+
+I can tell you immediately which setup your repo expects and whether you should add pytest.ini or move files.
 
 --------------------------------------------------
-Prompt 2: "Copy paste your question"
-LLM Response 2: "Copy paste LLMs response"
+Prompt 2: what is the error here: (.venv) NathanB@Nathanmac EECS4312_Lab5_SpecificationLab_A_219317965 % PYTHONPATH=src pytest -v =================================== test session starts =================================== platform darwin -- Python 3.13.5, pytest-9.0.2, pluggy-1.6.0 -- /Users/NathanB/EECS4312_Lab5_SpecificationLab_A_219317965/.venv/bin/python3.13 cachedir: .pytest_cache rootdir: /Users/NathanB/EECS4312_Lab5_SpecificationLab_A_219317965 collected 4 items tests/test_solution.py::test_single_event_blocks_overlapping_slots PASSED [ 25%] tests/test_solution.py::test_event_outside_working_hours_is_ignored PASSED [ 50%] tests/test_solution.py::test_unsorted_events_are_handled FAILED [ 75%] tests/test_solution.py::test_lunch_break_blocks_all_slots_during_lunch FAILED [100%] ======================================== FAILURES ========================================= ____________________________ test_unsorted_events_are_handled _____________________________ def test_unsorted_events_are_handled(): """ Constraint: Event order should not affect correctness. """ events = [ {"start": "13:00", "end": "14:00"}, {"start": "09:30", "end": "10:00"}, {"start": "11:00", "end": "12:00"}, ] slots = suggest_slots(events, meeting_duration=30, day="2026-02-01") > assert slots[1] == "10:15" E AssertionError: assert '10:00' == '10:15' E E - 10:15 E + 10:00 tests/test_solution.py:50: AssertionError _____________________ test_lunch_break_blocks_all_slots_during_lunch ______________________ def test_lunch_break_blocks_all_slots_during_lunch(): """ Constraint: No meeting may start during the lunch break (12:00–13:00). """ events = [] slots = suggest_slots(events, meeting_duration=30, day="2026-02-01") > assert "12:00" not in slots E AssertionError: assert '12:00' not in ['09:00', '09:15', '09:30', '09:45', '10:00', '10:15', ...] tests/test_solution.py:61: AssertionError ================================= short test summary info ================================= FAILED tests/test_solution.py::test_unsorted_events_are_handled - AssertionError: assert '10:00' == '10:15' FAILED tests/test_solution.py::test_lunch_break_blocks_all_slots_during_lunch - AssertionError: assert '12:00' not in ['09:00', '09:15', '09:30', '09:45', '10:00', '1... =============================== 2 failed, 2 passed in 0.11s =============================== (.venv) NathanB@Nathanmac EECS4312_Lab5_SpecificationLab_A_219317965 % ls README.md docs src tests (.venv) NathanB@Nathanmac EECS4312_Lab5_SpecificationLab_A_219317965 % ls src __pycache__ solution.py (.venv) NathanB@Nathanmac EECS4312_Lab5_SpecificationLab_A_219317965 %
+LLM Response 2: 
+
+1) test_unsorted_events_are_handled failure
+What the test expected
+
+It expected:
+
+slots[1] == "10:15"
+
+
+But your output has:
+
+slots[1] == "10:00"
+
+What that means (the real constraint)
+
+The tests are assuming a 15-minute grid, but also that suggested start times must align to the next valid “:00/:15/:30/:45” boundary after any event ends.
+
+In this case:
+
+There’s an event from 09:30–10:00
+
+A 30-min meeting cannot start at 09:45 because it overlaps (09:45–10:15)
+
+The “first available” after that should be 10:00, but the test expects 10:15
+
+So the lab’s implied rule is:
+
+✅ Start times must be aligned to “quarter-hour boundaries”, and additionally cannot start immediately at an event end unless it is followed by a free 15-minute buffer OR unless the next slot boundary is used.
+
+Put simpler: they want you to “round up” candidate start times based on constraints, not just use a fixed grid from 09:00.
+
+That’s why they want 10:15 instead of 10:00 in that particular ordering scenario.
+
+2) test_lunch_break_blocks_all_slots_during_lunch failure
+What the test expected
+
+It explicitly enforces:
+
+“No meeting may start during the lunch break (12:00–13:00).”
+
+So it asserts:
+
+"12:00" not in slots
+
+
+But your output includes "12:00".
+
+✅ This means you must implement a lunch-start restriction:
+
+If start time is in [12:00, 13:00), it is invalid.
 --------------------------------------------------

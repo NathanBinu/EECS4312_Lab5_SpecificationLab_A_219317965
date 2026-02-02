@@ -64,3 +64,14 @@ def test_lunch_break_blocks_all_slots_during_lunch():
     assert "12:45" not in slots
 
 """TODO: Add at least 5 additional test cases to test your implementation."""
+
+
+def test_meeting_must_fit_before_work_end():
+    #Constraint:
+    #Meeting must end by the end of working hours.
+    events = []
+    slots = suggest_slots(events, meeting_duration=60, day="2026-02-01")
+
+    assert "16:00" in slots
+    assert "16:15" not in slots  # would end at 17:15
+

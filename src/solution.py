@@ -3,6 +3,8 @@
 
 from typing import List, Dict, Tuple
 
+from datetime import datetime
+
 WORK_START = "09:00"
 WORK_END = "17:00"
 LUNCH_START = "12:00"
@@ -17,6 +19,19 @@ on a given day, taking into account working hours, and possible specific constra
 for full requirements.
 """
 from typing import List, Dict
+
+def _is_friday(day: str) -> bool:
+    # Accepting both day abbreviations and YYYY-MM-DD dates
+    if not day:
+        return False
+    d = day.strip()
+    if d.lower() in {"fri", "friday"}:
+        return True
+    # Try YYYY-MM-DD
+    try:
+        return datetime.strptime(d, "%Y-%m-%d").weekday() == 4  # Monday=0 ... Friday=4
+    except ValueError:
+        return False
 
 def _to_minutes(hhmm: str) -> int:
     hh, mm = hhmm.split(":")
@@ -62,6 +77,12 @@ def suggest_slots(
     latest_start = work_end - meeting_duration
     if latest_start < work_start:
         return []
+    
+    if _is_friday(day):
+        friday_cutoff = _to_minutes("15:00")
+        latest_start = min(latest_start, friday_cutoff)
+        if latest_start < work_start:
+            return []
 
     slots: List[str] = []
 
@@ -91,6 +112,7 @@ def suggest_slots(
 
         slots.append(_to_hhmm(t))
         t += SLOT_STEP_MIN
+
 
     return slots
     """

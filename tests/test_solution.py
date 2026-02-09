@@ -75,3 +75,39 @@ def test_meeting_must_fit_before_work_end():
     assert "16:00" in slots
     assert "16:15" not in slots  # would end at 17:15
 
+
+def test_friday_blocks_starts_after_1500():
+    """
+    New requirement: On Fridays, meetings must not start after 15:00.
+    """
+    events = []
+    slots = suggest_slots(events, meeting_duration=30, day="Fri")
+
+    assert "15:15" not in slots
+    assert "15:30" not in slots
+    assert "16:00" not in slots
+
+
+def test_friday_allows_start_at_1500():
+    """
+    New requirement:
+    Starting at 15:00 is allowed (it is not after 15:00).
+    """
+    events = []
+    slots = suggest_slots(events, meeting_duration=60, day="Fri")
+
+    assert "15:00" in slots
+    assert "15:15" not in slots
+
+
+def test_friday_detected_from_date():
+    """
+    Friday rule should apply when day is a YYYY-MM-DD date that falls on Friday.
+    (Example: 2026-02-06 is a Friday.)
+    """
+    events = []
+    slots = suggest_slots(events, meeting_duration=30, day="2026-02-06")
+
+    assert "15:15" not in slots
+    assert "15:00" in slots
+
